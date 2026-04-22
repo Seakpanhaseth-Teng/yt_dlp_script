@@ -109,14 +109,17 @@ class YTDLPDownloader(ctk.CTk):
         threading.Thread(target=self.run_download, args=(url, folder, resolution, audio_format, video_format), daemon=True).start()
 
     def run_download(self, url, folder, resolution, audio_format, video_format):
-        # yt-dlp options
+        height = resolution.replace("p", "")
+        
         ydl_opts = {
             'outtmpl': f'{folder}/%(title)s.%(ext)s',
             'noplaylist': True,
             'progress_hooks': [self.my_hook],
+            'no_warnings': True,
+            'quiet': True,
+            'retries': 3,
+            'fragment_retries': 3,
         }
-
-        # Audio-only download
         if audio_format and audio_format != "None":
             ydl_opts['format'] = 'bestaudio/best'
             ydl_opts['postprocessors'] = [{
@@ -124,20 +127,15 @@ class YTDLPDownloader(ctk.CTk):
                 'preferredcodec': audio_format,
                 'preferredquality': '192',
             }]
-        # Video download
         else:
-            ydl_opts['format'] = f'bestvideo[height<={resolution.replace("p","")}]' + "+bestaudio/best"
-            if video_format:
-                ydl_opts['merge_output_format'] = video_format
-
-
+            ydl_opts['format'] = f'bestvideo[height<={height}]+bestaudio/best' if height else f'bestvideo[ext={video_format}]+bestaudio/best'
+        
         try:
             with yt_dlp.YoutubeDL(ydl_opts) as ydl:
                 ydl.download([url])
-            self.after(0, lambda: self.status_label.configure(text="Download complete!"))
+            self.after(0, lambda: self.status_label.configure(text="Download completed!"))
         except Exception as e:
-            self.after(0, lambda: self.status_label.configure(text=f"Error: {e}"))
-            self.after(0, lambda: messagebox.showerror("Download Error", str(e)))
+            self.after(0, lambda: self.status_label.configure(text=f"Error: {str(e)}"))
         finally:
             self.after(0, lambda: self.download_btn.configure(state="normal"))
 
