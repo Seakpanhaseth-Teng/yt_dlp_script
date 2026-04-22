@@ -110,7 +110,7 @@ class YTDLPDownloader(ctk.CTk):
 
     def run_download(self, url, folder, resolution, audio_format, video_format):
         height = resolution.replace("p", "")
-        
+
         ydl_opts = {
             'outtmpl': f'{folder}/%(title)s.%(ext)s',
             'noplaylist': True,
@@ -120,6 +120,7 @@ class YTDLPDownloader(ctk.CTk):
             'retries': 3,
             'fragment_retries': 3,
         }
+
         if audio_format and audio_format != "None":
             ydl_opts['format'] = 'bestaudio/best'
             ydl_opts['postprocessors'] = [{
@@ -128,14 +129,17 @@ class YTDLPDownloader(ctk.CTk):
                 'preferredquality': '192',
             }]
         else:
-            ydl_opts['format'] = f'bestvideo[height<={height}]+bestaudio/best' if height else f'bestvideo[ext={video_format}]+bestaudio/best'
-        
+            ydl_opts['format'] = (
+                f'bestvideo[height<={height}][ext={video_format}]+bestaudio/'
+                f'bestvideo[height<={height}]+bestaudio/best'
+            )
+
         try:
             with yt_dlp.YoutubeDL(ydl_opts) as ydl:
                 ydl.download([url])
-            self.after(0, lambda: self.status_label.configure(text="Download completed!"))
+            self.after(0, lambda: self.status_label.configure(text="Download complete!"))
         except Exception as e:
-            self.after(0, lambda: self.status_label.configure(text=f"Error: {str(e)}"))
+            self.after(0, lambda: self.status_label.configure(text=f"Error: {e}"))
         finally:
             self.after(0, lambda: self.download_btn.configure(state="normal"))
 
