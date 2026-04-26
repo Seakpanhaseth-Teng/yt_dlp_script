@@ -17,39 +17,24 @@ FFMPEG_DIR = os.path.join(SCRIPT_DIR, "ffmpeg-master-latest-win64-gpl", "ffmpeg-
 
 def check_for_updates():
     try:
-        result = subprocess.run(
-            ['pip', 'index', 'versions', 'yt-dlp'],
-            capture_output=True,
-            text=True,
-            timeout=15
-        )
-        if result.returncode == 0:
-            output = result.stdout
-            for line in output.split('\n'):
-                if 'Available versions:' in line:
-                    parts = line.split(':')
-                    if len(parts) > 1:
-                        versions = parts[1].strip().split(', ')
-                        break
-                    else:
-                        return "Could not fine version info"
-                    check =  subprocess.run(
-                        ['pip', 'show', 'yt-dlp'],
-                        capture_output=True,
-                        text=True,
-                        timeout=10
-                    )
-                    current = None 
-                    for line in check.stdout.split('\n'):
-                        if line.startswith('Version:'):
-                            current = line.split(':')[1].strip()
-                            break
-
-                        if current and current != latest:
-                            return f"Update available: {current} -> {latest}"
-                        return "yt-dlp is up to date"
+        import importlib.metadata
+        import json
+        import urllib.request
+        
+        # Get current version
+        current = importlib.metadata.version('yt-dlp')
+        
+        # Get latest version from PyPI JSON API
+        with urllib.request.urlopen('https://pypi.org/pypi/yt-dlp/json', timeout=5) as response:
+            data = json.loads(response.read().decode())
+            latest = data['info']['version']
+        
+        # Compare versions
+        if latest != current:
+            return f"Update available: {current} → {latest}"
+        return "yt-dlp is up to date"
     except Exception as e:
-        return f"Error checking for updates: {e}"
+        return "Update check unavailable"
 class YTDLPDownloader(ctk.CTk):
     def __init__(self):
         super().__init__()
@@ -75,7 +60,7 @@ class YTDLPDownloader(ctk.CTk):
         self.create_widgets()
         update_msg = check_for_updates()
         self.after(100, lambda: self.status_label.configure(text=update_msg))
-        
+
     def create_widgets(self):
         # URL input
         self.url_label = ctk.CTkLabel(self, text="YouTube URL:", font=self.font_bold, text_color=self.red)
