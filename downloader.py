@@ -42,12 +42,12 @@ def check_for_updates():
             result = subprocess.run(
                 [sys.executable, '-m', 'pip', 'install', '--upgrade', 'yt-dlp'], 
                 capture_output=True, 
-                text=True
+                text=True,
                 timeout=60
             )
             if result.returncode == 0:
                 return "Update successful! Please restart the application."
-        return f"Update failed: {result.stderr}"
+            return f"Update failed: {result.stderr}"
         except Exception as e:
             return f"Update failed: {e}"
 
@@ -60,15 +60,12 @@ class YTDLPDownloader(ctk.CTk):
         self.configure(bg="#000000")
 
         self.create_widgets()
+
         current_ver, latest_ver = check_for_updates()
         if latest_ver:
             self.after(100, lambda: self.status_label.configure(text=f"Update available: {current_ver} → {latest_ver}"))
-            self.after(200, lambda: messagebox.askyesno("Update Available", f"yt-dlp {latest_ver} is available. Update now?"))
-            if messagebox.askyesno("Update Available", f"yt-dlp {latest_ver} is available. Update now?"):
-                result = update_yt_dlp()
-                self.after(100, lambda: self.status_label.configure(text=result))
         else:
-            self.after(100, lambda: self.status_label.configure(text="yt-dlp is up to date"))
+            self.after(100, lambda: self.status_label.configure(text="yt-dlp is up to date" if current_ver else "Ready"))
 
         # Color scheme
         self.red = "#1AABFF"  
@@ -85,8 +82,11 @@ class YTDLPDownloader(ctk.CTk):
 
         # Widgets
         self.create_widgets()
-        update_msg = check_for_updates()
-        self.after(100, lambda: self.status_label.configure(text=update_msg))
+        current_ver, latest_ver = check_for_updates()
+        if latest_ver:
+            self.after(100, lambda: self.status_label.configure(text=f"Update available: {current_ver} → {latest_ver}"))
+        else:
+            self.after(100, lambda: self.status_label.configure(text="yt-dlp is up to date" if current_ver else "Ready"))
 
     def create_widgets(self):
         # URL input
