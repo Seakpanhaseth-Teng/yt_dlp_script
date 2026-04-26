@@ -7,6 +7,7 @@ from tkinter import filedialog, messagebox
 import threading
 import os
 import subprocess
+import sys
 import json
 
 ctk.set_appearance_mode("Dark")
@@ -31,10 +32,25 @@ def check_for_updates():
         
         # Compare versions
         if latest != current:
-            return f"Update available: {current} → {latest}"
-        return "yt-dlp is up to date"
+            return current, latest
+        return current, None
     except Exception as e:
-        return "Update check unavailable"
+        return None, None
+    
+    def update_yt_dlp():
+        try:
+            result = subprocess.run(
+                [sys.executable, '-m', 'pip', 'install', '--upgrade', 'yt-dlp'], 
+                capture_output=True, 
+                text=True
+                timeout=60
+            )
+            if result.returncode == 0:
+                return "Update successful! Please restart the application."
+        return f"Update failed: {result.stderr}"
+        except Exception as e:
+            return f"Update failed: {e}"
+
 class YTDLPDownloader(ctk.CTk):
     def __init__(self):
         super().__init__()
@@ -42,6 +58,17 @@ class YTDLPDownloader(ctk.CTk):
         self.geometry("500x400")
         self.resizable(False, False)
         self.configure(bg="#000000")
+
+        self.create_widgets()
+        current_ver, latest_ver = check_for_updates()
+        if latest_ver:
+            self.after(100, lambda: self.status_label.configure(text=f"Update available: {current_ver} → {latest_ver}"))
+            self.after(200, lambda: messagebox.askyesno("Update Available", f"yt-dlp {latest_ver} is available. Update now?"))
+            if messagebox.askyesno("Update Available", f"yt-dlp {latest_ver} is available. Update now?"):
+                result = update_yt_dlp()
+                self.after(100, lambda: self.status_label.configure(text=result))
+        else:
+            self.after(100, lambda: self.status_label.configure(text="yt-dlp is up to date"))
 
         # Color scheme
         self.red = "#1AABFF"  
@@ -82,6 +109,9 @@ class YTDLPDownloader(ctk.CTk):
         self.options_frame = ctk.CTkFrame(self, fg_color=self.black)
         self.options_frame.pack(pady=10, fill="x", padx=40)
         self.res_label = ctk.CTkLabel(self.options_frame, text="Video Resolution:", font=self.font, text_color=self.red)
+         # Update button
+        self.update_btn = ctk.CTkButton(self, text="Update yt-dlp", command=self.do_update, width=200, height=30, fg_color="#444444", text_color=self.red, font=self.font)
+        self.update_btn.pack(pady=(5, 10))
         self.res_label.pack(side="left", padx=(10, 5))
         self.res_dropdown = ctk.CTkOptionMenu(self.options_frame, variable=self.resolution_var, values=["1440p", "1080p", "720p", "480p"], fg_color=self.red, button_color=self.red, button_hover_color="#B20000", text_color=self.black, font=self.font)
         self.res_dropdown.pack(side="left", padx=5)
