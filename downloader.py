@@ -6,6 +6,8 @@ import tkinter as tk
 from tkinter import filedialog, messagebox
 import threading
 import os
+import subprocess
+import json
 
 ctk.set_appearance_mode("Dark")
 ctk.set_default_color_theme("dark-blue")  # We'll override colors manually
@@ -13,6 +15,41 @@ ctk.set_default_color_theme("dark-blue")  # We'll override colors manually
 SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
 FFMPEG_DIR = os.path.join(SCRIPT_DIR, "ffmpeg-master-latest-win64-gpl", "ffmpeg-master-latest-win64-gpl", "bin")
 
+def check_for_updates():
+    try:
+        result = subprocess.run(
+            ['pip', 'index', 'versions', 'yt-dlp'],
+            capture_output=True,
+            text=True,
+            timeout=15
+        )
+        if result.returncode == 0:
+            output = result.stdout
+            for line in output.split('\n'):
+                if 'Available versions:' in line:
+                    parts = line.split(':')
+                    if len(parts) > 1:
+                        versions = parts[1].strip().split(', ')
+                        break
+                    else:
+                        return "Could not fine version info"
+                    check =  subprocess.run(
+                        ['pip', 'show', 'yt-dlp'],
+                        capture_output=True,
+                        text=True,
+                        timeout=10
+                    )
+                    current = None 
+                    for line in check.stdout.split('\n'):
+                        if line.startswith('Version:'):
+                            current = line.split(':')[1].strip()
+                            break
+
+                        if current and current != latest:
+                            return f"Update available: {current} -> {latest}"
+                        return "yt-dlp is up to date"
+    except Exception as e:
+        return f"Error checking for updates: {e}"
 class YTDLPDownloader(ctk.CTk):
     def __init__(self):
         super().__init__()
@@ -36,7 +73,9 @@ class YTDLPDownloader(ctk.CTk):
 
         # Widgets
         self.create_widgets()
-
+        update_msg = check_for_updates()
+        self.after(100, lambda: self.status_label.configure(text=update_msg))
+        
     def create_widgets(self):
         # URL input
         self.url_label = ctk.CTkLabel(self, text="YouTube URL:", font=self.font_bold, text_color=self.red)
