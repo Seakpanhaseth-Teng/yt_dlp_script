@@ -5,10 +5,13 @@ import yt_dlp
 import tkinter as tk
 from tkinter import filedialog, messagebox
 import threading
+import os
 
 ctk.set_appearance_mode("Dark")
 ctk.set_default_color_theme("dark-blue")  # We'll override colors manually
 
+SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
+FFMPEG_DIR = os.path.join(SCRIPT_DIR, "ffmpeg-master-latest-win64-gpl", "ffmpeg-master-latest-win64-gpl", "bin")
 
 class YTDLPDownloader(ctk.CTk):
     def __init__(self):
@@ -112,6 +115,7 @@ class YTDLPDownloader(ctk.CTk):
         height = resolution.replace("p", "")
 
         ydl_opts = {
+            'ffmpeg_location': FFMPEG_DIR,
             'outtmpl': f'{folder}/%(title)s.%(ext)s',
             'noplaylist': True,
             'progress_hooks': [self.my_hook],
