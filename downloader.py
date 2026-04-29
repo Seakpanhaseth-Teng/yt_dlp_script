@@ -1,6 +1,4 @@
-
-# CustomTkinter GUI wrapper for yt-dlp
-import customtkinter as ctk
+import customtkinter as ctk # CustomTkinter GUI wrapper for yt-dlp
 import yt_dlp
 import tkinter as tk
 from tkinter import filedialog, messagebox
