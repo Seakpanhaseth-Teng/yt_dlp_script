@@ -1,6 +1,3 @@
-# This is the FIXED version of downloader.py
-# Copy everything below this line and replace the contents of yt_dlp_script/downloader.py
-
 import customtkinter as ctk
 import yt_dlp
 import tkinter as tk
