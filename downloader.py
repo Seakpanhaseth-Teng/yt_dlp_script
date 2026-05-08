@@ -1,13 +1,14 @@
-import customtkinter as ctk
-import yt_dlp
-import tkinter as tk
-from tkinter import filedialog, messagebox
-import threading
+import json
 import os
 import subprocess
 import sys
-import json
+import threading
 import urllib.request
+from tkinter import filedialog, messagebox
+
+import customtkinter as ctk
+import tkinter as tk
+import yt_dlp
 
 ctk.set_appearance_mode("Dark")
 ctk.set_default_color_theme("dark-blue")
