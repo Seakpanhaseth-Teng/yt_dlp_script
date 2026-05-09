@@ -1,7 +1,0 @@
-.venv/
-ffmpeg-master-latest-win64-gpl/
-__pycache__/
-*.pyc
-*.spec
-build/
-dist/
