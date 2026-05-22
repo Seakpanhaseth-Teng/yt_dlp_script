@@ -1,0 +1,58 @@
+[build-system]
+requires = ["setuptools>=68.0"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "yt-dlp-script"
+version = "1.0.0"
+description = "A modern GUI application for downloading YouTube videos and audio"
+readme = "README.md"
+license = {text = "MIT"}
+authors = [
+    {name = "Seakpanhaseth Teng"},
+]
+requires-python = ">=3.10"
+dependencies = [
+    "customtkinter>=5.2",
+    "yt-dlp>=2024.0",
+]
+
+[project.scripts]
+yt-dlp-downloader = "yt_dlp_script.gui:main"
+
+[project.urls]
+Homepage = "https://github.com/Seakpanhaseth/yt_dlp_script"
+Repository = "https://github.com/Seakpanhaseth/yt_dlp_script"
+"Bug Tracker" = "https://github.com/Seakpanhaseth/yt_dlp_script/issues"
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.ruff]
+line-length = 100
+target-version = "py310"
+
+[tool.ruff.format]
+quote-style = "double"
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "N", "W", "D"]
+
+[tool.ruff.lint.per-file-ignores]
+"tests/*" = ["D"]
+
+[tool.mypy]
+python_version = "3.10"
+strict = true
+ignore_missing_imports = true
+warn_unused_ignores = false
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+python_files = ["test_*.py"]
+markers = [
+    "slow: marks tests as slow (deselect with '-m \"not slow\"')",
+]
+
+[tool.coverage.run]
+source = ["yt_dlp_script"]
